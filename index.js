@@ -13,12 +13,12 @@ const ENCODING = 'LINEAR16';
 const SAMPLE_RATE_HERTZ = 22050;
 const LANGUAGE = 'es-ES';
 
-const audioConfig = {
-    encoding: ENCODING,
-    // sampleRateHertz: SAMPLE_RATE_HERTZ,
-    languageCode: LANGUAGE,
-    // audioChannelCount: 1,
-};
+// const audioConfig = {
+//     encoding: ENCODING,
+//     // sampleRateHertz: SAMPLE_RATE_HERTZ,
+//     languageCode: LANGUAGE,
+//     // audioChannelCount: 1,
+// };
 
 const convertToText = (file, config) => {
     console.log('FILE:', JSON.stringify(file));
@@ -53,12 +53,6 @@ exports.audioToText = (req, res) => {
         res.status(405).end();
     }
 
-
-    // console.log('req body: ', req.body)
-    // var thing = req.param('thing')
-    console.log('test 1: ', req.body.toString())
-    // console.log('test 2: ', req.body.toString('hex'))
-    // console.log('test 3: ', req.body.data)
     const busboy = new Busboy({ headers: req.headers });
     const tmpdir = os.tmpdir();
 
@@ -104,31 +98,44 @@ exports.audioToText = (req, res) => {
                         '-vn',
                         '-ac 1',
                         '-ar 44100'
-                    ])  
-                    // .output('outputfile.mp4')
-                    // .output(stream)
-                    // .stream(stream)
+                    ])
                     .save(filePathOut)
                     .on('end', () => {
-                        // console.log('ended, stream: ', stream)
-                        console.log('ended, saved on: ', filePathOut)
-                        fs.readdirSync('/tmp/').forEach(file => {
-                            console.log('files saved: ', file);
-                          });
-
-                          console.log('converting: ', filePathOut)
+                        let audioConfig = {
+                            encoding: 'LINEAR16',
+                            languageCode: req.query.language
+                        }
                         convertToText(filePathOut, audioConfig).then((response) => {
                             console.log('response: ', response)
                             const transcript = response[0].results
                                 .map(result => result.alternatives[0].transcript)
                                 .join('\n');
-                            res.send({ transcript });
+
+                                console.log('test 2: ', req.query)
+                                let current = req.query.message.toLowerCase().replace(/\./g,'').split(' ')
+                                let userSpeech = transcript.toLowerCase().split(' ')
+                                let correctCount = 0
+                            
+                                let checkAnswers = []
+                            
+                                for(let i = 0; i< userSpeech.length; i++){
+                                  if(current.indexOf(userSpeech[i]) >= 0){
+                                    checkAnswers.push({ word: userSpeech[i], is_right: true })
+                                    correctCount++
+                                  }else{
+                                    checkAnswers.push({ word: userSpeech[i], is_right: false })
+                                  }
+                                }
+                            
+                                let processedAnswers = {
+                                  distance: 100 - ( (correctCount / current.length) * 100),
+                                  ratio: correctCount / current.length,
+                                  is_match: correctCount == current.length,
+                                  query: checkAnswers
+                                }
+
+                            res.send(processedAnswers);
                         });
-                        // fs.unlinkSync(tmpFilePath);
-
-
-                        // res.send({ ended: 'test' })
-                        // resolve(filePathOut)
                     })
                     .on('error', function(err, stdout, stderr) {
                         console.log('Cannot process video: ' + err.message);
@@ -146,7 +153,6 @@ exports.audioToText = (req, res) => {
     // Need to wait for the disk writes to complete.
     busboy.on('finish', () => {
         fileWritePromise.then(() => {
-            console.log('audio config: ', audioConfig)
             console.log('tmpFilePath: ', tmpFilePath)
 
             let filePathOut = '/tmp/output.wav'
