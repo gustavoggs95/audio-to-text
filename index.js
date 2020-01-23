@@ -52,6 +52,8 @@ exports.audioToText = (req, res) => {
     if (req.method !== 'POST') {
         res.status(405).end();
     }
+    res.set('Access-Control-Allow-Origin', "*")
+    res.set('Access-Control-Allow-Methods', 'GET, POST')
 
     const busboy = new Busboy({ headers: req.headers });
     const tmpdir = os.tmpdir();
@@ -112,7 +114,7 @@ exports.audioToText = (req, res) => {
                                 .join('\n');
 
                                 console.log('test 2: ', req.query)
-                                let current = req.query.message.toLowerCase().replace(/\.|\?|\- |\!/g,'').split(' ')
+                                let current = req.query.message.toLowerCase().replace(/\.|\?|\- |\– |\!/g,'').split(' ')
                                 let userSpeech = transcript.toLowerCase().split(' ')
                                 let correctCount = 0
                             
