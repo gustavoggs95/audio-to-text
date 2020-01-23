@@ -113,7 +113,7 @@ exports.audioToText = (req, res) => {
                                 .map(result => result.alternatives[0].transcript)
                                 .join('\n');
 
-                                console.log('test 2: ', req.query)
+                                console.log('test 22222: ', req.query)
                                 let current = req.query.message.toLowerCase().replace(/\.|\?|\- |\– |\!/g,'').split(' ')
                                 let userSpeech = transcript.toLowerCase().split(' ')
                                 let correctCount = 0
