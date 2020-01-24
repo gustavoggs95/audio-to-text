@@ -143,10 +143,6 @@ exports.audioToText = (req, res) => {
                     .on('error', function(err, stdout, stderr) {
                         console.log('Cannot process video: ' + err.message);
                       })
-                      .run()
-
-                      
-
             } catch (e) {
                 reject(e);
             }
