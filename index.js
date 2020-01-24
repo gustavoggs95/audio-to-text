@@ -107,14 +107,14 @@ exports.audioToText = (req, res) => {
                             encoding: 'LINEAR16',
                             languageCode: req.query.language
                         }
-                        console.log('OND END EXECUTED')
+                        // console.log('OND END EXECUTED')
                         convertToText(filePathOut, audioConfig).then((response) => {
                             console.log('response: ', response)
                             const transcript = response[0].results
                                 .map(result => result.alternatives[0].transcript)
                                 .join('\n');
 
-                                console.log('test 22222: ', req.query)
+                                // console.log('test 22222: ', req.query)
                                 let current = req.query.message.toLowerCase().replace(/\.|\?|\- |\– |\!/g,'').split(' ')
                                 let userSpeech = transcript.toLowerCase().split(' ')
                                 let correctCount = 0
