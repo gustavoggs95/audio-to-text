@@ -107,6 +107,7 @@ exports.audioToText = (req, res) => {
                             encoding: 'LINEAR16',
                             languageCode: req.query.language
                         }
+                        console.log('OND END EXECUTED')
                         convertToText(filePathOut, audioConfig).then((response) => {
                             console.log('response: ', response)
                             const transcript = response[0].results
